@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Form, Input, Button, Select } from "antd";
 
 import "./NewReminder.css";
@@ -7,10 +7,16 @@ const { Option } = Select;
 
 const NewReminder = (props) => {
   const { onCancel } = props;
-  const [componentSize, setComponentSize] = useState("default");
 
-  const onFormLayoutChange = ({ size }) => {
-    setComponentSize(size);
+  const onSubmitForm = (values) => {
+    console.log('Success:', values);
+    const newData = []; 
+    newData.push(values);
+    const existData = JSON.parse(localStorage.getItem("alarmData")) ?? []
+    const alarmData = [...newData, ...existData];
+    
+    console.log(alarmData)
+    localStorage.setItem("alarmData", JSON.stringify(alarmData));
   };
 
   return (
@@ -23,16 +29,13 @@ const NewReminder = (props) => {
           span: 14,
         }}
         layout="horizontal"
-        initialValues={{
-          size: componentSize,
-        }}
-        onValuesChange={onFormLayoutChange}
-        size={componentSize}
+        // onValuesChange={onFormLayoutChange}
+        onFinish={onSubmitForm}
       >
-        <Form.Item>
+        <Form.Item name="userName">
           <Input placeholder="What's your name?" />
         </Form.Item>
-        <Form.Item>
+        <Form.Item name="alarmPeriod">
           <Select placeholder="When you want me to remind?">
             <Option value="10 min"> Every 10 Min</Option>
             <Option value="20 min">Every 20 Min</Option>
@@ -40,7 +43,7 @@ const NewReminder = (props) => {
             <Option value="1 hr">Every 1 hour</Option>
           </Select>
         </Form.Item>
-        <Form.Item>
+        <Form.Item name="reminderName">
           <Input placeholder="What's the reminder?" />
         </Form.Item>
         <Form.Item>
