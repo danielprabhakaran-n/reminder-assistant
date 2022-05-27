@@ -1,33 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Select } from "antd";
 import { useNavigate } from "react-router-dom";
 
-import "./NewReminder.css";
+import "./EditReminder.css";
 
 const { Option } = Select;
 
-const NewReminder = (props) => {
+const EditReminder = (props) => {
   const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [editableData, setEditableData] = useState({});
 
   const onSubmitForm = (values) => {
-    values.id= "id" + Math.random().toString(16).slice(2);
-
-    const newData = []; 
-    newData.push(values);
-    const existData = JSON.parse(localStorage.getItem("reminderData")) ?? []
-    const reminderData = [...newData, ...existData];
-    
+    values.id = editableData?.id;
+    const existData = JSON.parse(localStorage.getItem("reminderData")) ?? [];
+    const foundIndex = existData?.findIndex((item) => item?.id == values?.id);
+    console.log(existData, foundIndex, values?.id);
+    existData[foundIndex] = values;
+    const reminderData = existData;
+    localStorage.setItem("editableReminderdata", JSON.stringify({}));
     localStorage.setItem("reminderData", JSON.stringify(reminderData));
     navigate("/reminder-list");
   };
 
   const onNewReminderCancelHandler = () => {
+    localStorage.setItem("editableReminderdata", JSON.stringify({}));
+    form.resetFields();
     navigate("/");
   };
+
+  useEffect(() => {
+    const editableReminderData =
+      JSON.parse(localStorage.getItem("editableReminderdata")) ?? {};
+    if (editableReminderData) {
+      setEditableData(editableReminderData);
+      form.setFieldsValue({
+        userName: editableReminderData.userName,
+        reminderPeriod: editableReminderData.reminderPeriod,
+        reminderName: editableReminderData.reminderName,
+      });
+    }
+  }, []);
 
   return (
     <div className="container">
       <Form
+        form={form}
         labelCol={{
           span: 4,
         }}
@@ -37,6 +55,11 @@ const NewReminder = (props) => {
         layout="horizontal"
         // onValuesChange={onFormLayoutChange}
         onFinish={onSubmitForm}
+        initialValues={{
+          userName: editableData.userName,
+          reminderPeriod: editableData.reminderPeriod,
+          reminderName: editableData.reminderName,
+        }}
       >
         <Form.Item name="userName">
           <Input placeholder="What's your name?" />
@@ -69,4 +92,4 @@ const NewReminder = (props) => {
   );
 };
 
-export default NewReminder;
+export default EditReminder;
